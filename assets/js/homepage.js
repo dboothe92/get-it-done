@@ -2,6 +2,7 @@ let userFormEl = document.querySelector("#user-form");
 let nameInputEl = document.querySelector("#username");
 let repoContainerEl = document.querySelector("#repos-container");
 let repoSearchTerm = document.querySelector("#repo-search-term");
+let languageButtonsEl = document.querySelector("#language-buttons");
 
 //handles button click
  function formSubmitHandler(event) {
@@ -37,6 +38,7 @@ function getUserRepos(user) {
     });
 };
 
+//displays list of repos on screen
 function displayRepos(repos, searchTerm) {
     //check if api returned any repos
     if (repos.length === 0) {
@@ -85,5 +87,34 @@ function displayRepos(repos, searchTerm) {
         repoContainerEl.appendChild(repoEl);
     };
 };
+
+//function that only retrieves featured repos that have help wanted tags
+function getFeaturedRepos(languages) {
+    let apiUrl = "https://api.github.com/search/repositories?q=" + languages + "+is:featured&sort=help-wanted-issues";
+
+    fetch(apiUrl).then(function(response) {
+        if (response.ok) {
+            response.json().then(function(data) {
+                displayRepos(data.items, languages);
+            });
+        } else {
+            alert("Error  " + response.status);
+        };
+    });
+};
+
+//function to handle button clicks
+function buttonClickHandler(event) {
+    let language = event.target.getAttribute("data-language");
+    if (language) {
+        getFeaturedRepos(language);
+
+        //clear old content
+        repoContainerEl.textContent = "";
+    }
+};
+
+//adds clickability to the language buttons
+languageButtonsEl.addEventListener("click", buttonClickHandler);
 
 userFormEl.addEventListener("submit", formSubmitHandler);
